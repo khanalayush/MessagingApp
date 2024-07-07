@@ -5,23 +5,28 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class Client extends JFrame implements ActionListener {
+public class Client implements ActionListener {
 
     JTextField text;
-    JPanel jp;
-    Box vertical= Box.createVerticalBox();
+    static JPanel jp;
+    static Box vertical= Box.createVerticalBox();
+    static DataOutputStream dout;
+    static JFrame f= new JFrame();
 
     Client(){
-        setLayout(null);
+        f.setLayout(null);
 
         JPanel pl=new JPanel();
         pl.setBackground(new Color(0x093F67));
         pl.setBounds(0,0,500, 70);
         pl.setLayout(null);
-        add(pl);
+        f.add(pl);
 
         ImageIcon i1= new ImageIcon(ClassLoader.getSystemResource("icons/3.png"));
         Image img1= i1.getImage().getScaledInstance(25, 25, Image.SCALE_DEFAULT);
@@ -79,12 +84,12 @@ public class Client extends JFrame implements ActionListener {
 
         jp= new JPanel();
         jp.setBounds(5, 75, 440, 570);
-        add(jp);
+        f.add(jp);
 
         text= new JTextField();
         text.setBounds(5, 655, 310, 35);
         text.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
-        add(text);
+        f.add(text);
 
         JButton send= new JButton("Send");
         send.setBounds(320, 655, 123,35);
@@ -92,35 +97,41 @@ public class Client extends JFrame implements ActionListener {
         send.setForeground(Color.white);
         text.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
         send.addActionListener(this);
-        add(send);
+        f.add(send);
 
-        setSize(450,700);
-        setLocation(200, 50);
-        setUndecorated(true);
-        getContentPane().setBackground(Color.white);
+        f.setSize(450,700);
+        f.setLocation(800, 50);
+        f.setUndecorated(true);
+        f.getContentPane().setBackground(Color.white);
 
-        setVisible(true);//setVisible should always be used at the end statement so user can see all changes
+        f.setVisible(true);//setVisible should always be used at the end statement so user can see all changes
     }
 
     public void actionPerformed(ActionEvent ae){
-        String out= text.getText();
+        try {
+            String out = text.getText();
 
-        JPanel p2= formatLabel(out);
+            JPanel p2 = formatLabel(out);
 
-        jp.setLayout(new BorderLayout());
+            jp.setLayout(new BorderLayout());
 
-        JPanel right= new JPanel(new BorderLayout());
-        right.add(p2, BorderLayout.LINE_END);
-        vertical.add(right);
-        vertical.add(Box.createVerticalStrut(15));
+            JPanel right = new JPanel(new BorderLayout());
+            right.add(p2, BorderLayout.LINE_END);
+            vertical.add(right);
+            vertical.add(Box.createVerticalStrut(15));
 
-        jp.add(vertical, BorderLayout.PAGE_START);
+            jp.add(vertical, BorderLayout.PAGE_START);
 
-        text.setText("");
+            dout.writeUTF(out);
 
-        repaint();
-        invalidate();
-        validate();
+            text.setText("");
+
+            f.repaint();
+            f.invalidate();
+            f.validate();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public static JPanel formatLabel(String out){
@@ -147,6 +158,29 @@ public class Client extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args){
-        Client s=new Client();
+        Client c=new Client();
+
+        try{
+            Socket s= new Socket("127.0.0.1", 6001);
+            DataInputStream din= new DataInputStream(s.getInputStream());
+            dout= new DataOutputStream(s.getOutputStream());
+
+            while(true) {
+                jp.setLayout(new BorderLayout());
+                String msg = din.readUTF();
+                JPanel panel = formatLabel(msg);
+
+                JPanel left = new JPanel(new BorderLayout());
+                left.add(panel, BorderLayout.LINE_START);
+                vertical.add(left);
+
+                vertical.add(Box.createVerticalStrut(15));
+                jp.add(vertical, BorderLayout.PAGE_START);
+                f.validate();
+            }
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }
