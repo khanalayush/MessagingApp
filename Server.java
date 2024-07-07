@@ -65,7 +65,7 @@ public class Server extends JFrame implements ActionListener {
         dots.setBounds(420, 20,10, 25);
         pl.add(dots);
 
-        JLabel name= new JLabel("Raistar");
+        JLabel name= new JLabel("Shravan");
         name.setBounds(110,15, 100, 20);
         name.setForeground(Color.white);
         name.setFont(new Font("SAS_SERIF", Font.BOLD , 18));
@@ -147,6 +147,6 @@ public class Server extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args){
-        Server s=new Server();
+        Client s=new Client();
     }
 }
