@@ -19,6 +19,7 @@ public class Client implements ActionListener {
     static DataOutputStream dout;
     static JFrame f= new JFrame();
     static int MessageIdCounter= 1;
+    static String sender= "Goli";
 
     Client(){
         f.setLayout(null);
@@ -114,7 +115,7 @@ public class Client implements ActionListener {
 
             int messageId = MessageIdCounter++;
 
-            JPanel p2 = formatLabel(messageId,out);
+            JPanel p2 = formatLabel(sender, messageId, out);
 
             jp.setLayout(new BorderLayout());
 
@@ -125,7 +126,7 @@ public class Client implements ActionListener {
 
             jp.add(vertical, BorderLayout.PAGE_START);
 
-            dout.writeUTF(out);
+            dout.writeUTF(sender + ":" + out);
 
             text.setText("");
 
@@ -137,12 +138,16 @@ public class Client implements ActionListener {
         }
     }
 
-    public static JPanel formatLabel(int messageId, String out){
+    public static JPanel formatLabel(String sender, int messageId, String out){
         JPanel panel= new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
+        JLabel senderLabel= new JLabel(sender);
+        panel.add(senderLabel);
+
         JLabel messageIdLabel = new JLabel("message id: " + messageId);
         panel.add(messageIdLabel);
+
 
         JLabel output= new JLabel("<html><p style=\"width: 150px\">" + out + "</p><html>");
         output.setFont(new Font("Tahoma", Font.PLAIN,16));
@@ -174,8 +179,13 @@ public class Client implements ActionListener {
             while(true) {
                 jp.setLayout(new BorderLayout());
                 String msg = din.readUTF();
+
+                String sender= msg.split(":")[0].trim();
+                String content= msg.substring(msg.indexOf(":")+1).trim();
+
                 int messageId= MessageIdCounter++;
-                JPanel panel = formatLabel(messageId,msg);
+
+                JPanel panel = formatLabel(sender, messageId, content);
 
                 JPanel left = new JPanel(new BorderLayout());
                 left.add(panel, BorderLayout.LINE_START);
