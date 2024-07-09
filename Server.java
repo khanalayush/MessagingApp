@@ -19,6 +19,7 @@ public class Server implements ActionListener {
     static Box vertical= Box.createVerticalBox();
     static JFrame f= new JFrame();
     static DataOutputStream dout;
+    static int MessageIdCounter= 1;
 
     Server(){
         f.setLayout(null);
@@ -43,7 +44,7 @@ public class Server implements ActionListener {
             }
         });
 
-        ImageIcon i3= new ImageIcon(ClassLoader.getSystemResource("icons/1.png"));
+        ImageIcon i3= new ImageIcon(ClassLoader.getSystemResource("icons/jethalal.png"));
         Image img2= i3.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT);
         ImageIcon i4= new ImageIcon(img2);
         JLabel profile= new JLabel(i4);
@@ -71,7 +72,7 @@ public class Server implements ActionListener {
         dots.setBounds(420, 20,10, 25);
         pl.add(dots);
 
-        JLabel name= new JLabel("Shravan");
+        JLabel name= new JLabel("Jethalal");
         name.setBounds(110,15, 100, 20);
         name.setForeground(Color.white);
         name.setFont(new Font("SAS_SERIF", Font.BOLD , 18));
@@ -112,7 +113,9 @@ public class Server implements ActionListener {
         try {
             String out = text.getText();
 
-            JPanel p2 = formatLabel(out);
+            int messageId = MessageIdCounter++;
+
+            JPanel p2 = formatLabel(messageId, out);
 
             jp.setLayout(new BorderLayout());
 
@@ -135,9 +138,12 @@ public class Server implements ActionListener {
         }
     }
 
-    public static JPanel formatLabel(String out){
+    public static JPanel formatLabel(int messageId, String out){
         JPanel panel= new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        JLabel messageIdLabel = new JLabel("message id:"+ messageId);
+        panel.add(messageIdLabel);
 
         JLabel output= new JLabel("<html><p style=\"width: 150px\">" + out + "</p><html>");
         output.setFont(new Font("Tahoma", Font.PLAIN,16));
@@ -163,6 +169,7 @@ public class Server implements ActionListener {
 
         try{
             ServerSocket skt= new ServerSocket(6001);
+
             while(true){
                 Socket soc= skt.accept();
                 DataInputStream din= new DataInputStream(soc.getInputStream());
@@ -170,7 +177,8 @@ public class Server implements ActionListener {
 
                 while(true){
                     String msg= din.readUTF();
-                    JPanel panel= formatLabel(msg);
+                    int messageId= MessageIdCounter++;
+                    JPanel panel= formatLabel(messageId, msg);
 
                     JPanel left= new JPanel(new BorderLayout());
                     left.add(panel, BorderLayout.LINE_START);
